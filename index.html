@@ -79,40 +79,16 @@
         // Die Geokoordinaten von Baden-Württemberg und ein geeigneter Zoom-Level
         var map = L.map('map').setView([48.7, 9.2], 12);  // Baden-Württemberg zentrieren und ein Zoom-Level setzen
 
-        // WMS-Layer von LGL-BW hinzufügen (angepasst für dynamische Kachelgrößen und Auflösungen)
+        // WMS-Layer von LGL-BW hinzufügen
         L.tileLayer.wms('https://owsproxy.lgl-bw.de/owsproxy/ows/WMS_LGL-BW_SNK_100_K?', {
-            layers: 'RDS.LY_SNK100K_col',
+            layers: 'RDS.LY_SNK100K_col',  // Der Layername, den du verwenden möchtest
             format: 'image/png',
             transparent: true,
             attribution: '&copy; Landesamt für Geoinformation und Landentwicklung Baden-Württemberg',
-            request: 'GetMap',
-            srs: 'EPSG:4326',
-            tileSize: function() {
-                var tileSize = 256;  // Standard Kachelgröße
-
-                // Dynamische Anpassung der Kachelgröße basierend auf dem Gerät
-                if (window.devicePixelRatio > 1) {
-                    tileSize = 512;  // Wenn es ein Retina-Display ist, größere Kacheln verwenden
-                }
-                return tileSize;
-            },
-            // Dynamische Größe basierend auf dem Zoom-Level und Pixeldichte
-            width: function() {
-                var zoom = map.getZoom();
-                var tileSize = 256;
-                if (window.devicePixelRatio > 1) {
-                    tileSize = 512;
-                }
-                return Math.pow(2, zoom) * tileSize;
-            },
-            height: function() {
-                var zoom = map.getZoom();
-                var tileSize = 256;
-                if (window.devicePixelRatio > 1) {
-                    tileSize = 512;
-                }
-                return Math.pow(2, zoom) * tileSize;
-            }
+            request: 'GetMap',  // GetMap-Anfrage
+            srs: 'EPSG:4326',  // WMS-Standard Koordinatenreferenzsystem (Lat/Lon)
+            width: 512,        // Standard-Kartenbreite
+            height: 512        // Standard-Kartenhöhe
         }).addTo(map);
 
         // Begrenzung der Karte auf Baden-Württemberg
