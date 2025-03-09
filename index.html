@@ -68,11 +68,6 @@
     <div class="header">
         <h1>POLIZEI Baden-Württemberg - Straßennetzkarte 1:100.000</h1>
 
-        <!-- Adresssuche
-        <div id="searchButton">
-            <input type="text" id="addressSearch" placeholder="Stadt oder Adresse suchen..." />
-        </div> -->
-
         <!-- GPS Standort Button -->
         <button id="locateButton">Mein Standort</button>
     </div>
@@ -84,16 +79,22 @@
         // Die Geokoordinaten von Baden-Württemberg und ein geeigneter Zoom-Level
         var map = L.map('map').setView([48.7, 9.2], 12);  // Baden-Württemberg zentrieren und ein Zoom-Level setzen
 
-        // WMS-Layer von LGL-BW hinzufügen
+        // WMS-Layer von LGL-BW hinzufügen (angepasst für dynamische Kachelgrößen und Auflösungen)
         L.tileLayer.wms('https://owsproxy.lgl-bw.de/owsproxy/ows/WMS_LGL-BW_SNK_100_K?', {
-            layers: 'RDS.LY_SNK100K_col',  // Der Layername, den du verwenden möchtest
+            layers: 'RDS.LY_SNK100K_col',
             format: 'image/png',
             transparent: true,
             attribution: '&copy; Landesamt für Geoinformation und Landentwicklung Baden-Württemberg',
-            request: 'GetMap',  // GetMap-Anfrage
-            srs: 'EPSG:4326',  // WMS-Standard Koordinatenreferenzsystem (Lat/Lon)
-            width: 256,        // Standard-Kartenbreite
-            height: 256        // Standard-Kartenhöhe
+            request: 'GetMap',
+            srs: 'EPSG:4326',
+            tileSize: 512,  // Größere Kacheln für bessere Auflösung
+            // Dynamische Größe basierend auf dem Zoom-Level
+            width: function() {
+                return Math.pow(2, map.getZoom()) * 256;  // Berechne die Kachelbreite dynamisch
+            },
+            height: function() {
+                return Math.pow(2, map.getZoom()) * 256;  // Berechne die Kachelhöhe dynamisch
+            }
         }).addTo(map);
 
         // Begrenzung der Karte auf Baden-Württemberg
