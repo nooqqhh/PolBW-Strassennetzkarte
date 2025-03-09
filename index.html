@@ -79,6 +79,18 @@
         // Die Geokoordinaten von Baden-Württemberg und ein geeigneter Zoom-Level
         var map = L.map('map').setView([48.7, 9.2], 12);  // Baden-Württemberg zentrieren und ein Zoom-Level setzen
 
+
+
+        function getTileSize() {
+
+            if (window.innerWidth <= 600) {
+                return 100;
+            } else {
+                return 256;
+            }
+        }
+
+
         // WMS-Layer von LGL-BW hinzufügen
         L.tileLayer.wms('https://owsproxy.lgl-bw.de/owsproxy/ows/WMS_LGL-BW_SNK_100_K?', {
             layers: 'RDS.LY_SNK100K_col',  // Der Layername, den du verwenden möchtest
@@ -87,8 +99,9 @@
             attribution: '&copy; Landesamt für Geoinformation und Landentwicklung Baden-Württemberg',
             request: 'GetMap',  // GetMap-Anfrage
             srs: 'EPSG:4326',  // WMS-Standard Koordinatenreferenzsystem (Lat/Lon)
-            width: 512,        // Standard-Kartenbreite
-            height: 512        // Standard-Kartenhöhe
+            tileSize: getTileSize(),
+            maxZoom: 19,
+            minZoom: 14
         }).addTo(map);
 
         // Begrenzung der Karte auf Baden-Württemberg
