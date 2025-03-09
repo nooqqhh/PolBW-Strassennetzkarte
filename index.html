@@ -27,8 +27,7 @@
         /* Die Kopfzeile mit den Schaltflächen */
         .header {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            justify-content: center;
             padding: 5px;
             color: white;
             background-color: #1985ff;
@@ -101,7 +100,7 @@
             srs: 'EPSG:4326',  // WMS-Standard Koordinatenreferenzsystem (Lat/Lon)
             tileSize: getTileSize(),
             maxZoom: 19,
-            minZoom: 14
+            minZoom: 11
         }).addTo(map);
 
         // Begrenzung der Karte auf Baden-Württemberg
