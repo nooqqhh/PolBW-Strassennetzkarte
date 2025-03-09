@@ -87,13 +87,31 @@
             attribution: '&copy; Landesamt für Geoinformation und Landentwicklung Baden-Württemberg',
             request: 'GetMap',
             srs: 'EPSG:4326',
-            tileSize: 512,  // Größere Kacheln für bessere Auflösung
-            // Dynamische Größe basierend auf dem Zoom-Level
+            tileSize: function() {
+                var tileSize = 256;  // Standard Kachelgröße
+
+                // Dynamische Anpassung der Kachelgröße basierend auf dem Gerät
+                if (window.devicePixelRatio > 1) {
+                    tileSize = 512;  // Wenn es ein Retina-Display ist, größere Kacheln verwenden
+                }
+                return tileSize;
+            },
+            // Dynamische Größe basierend auf dem Zoom-Level und Pixeldichte
             width: function() {
-                return Math.pow(2, map.getZoom()) * 256;  // Berechne die Kachelbreite dynamisch
+                var zoom = map.getZoom();
+                var tileSize = 256;
+                if (window.devicePixelRatio > 1) {
+                    tileSize = 512;
+                }
+                return Math.pow(2, zoom) * tileSize;
             },
             height: function() {
-                return Math.pow(2, map.getZoom()) * 256;  // Berechne die Kachelhöhe dynamisch
+                var zoom = map.getZoom();
+                var tileSize = 256;
+                if (window.devicePixelRatio > 1) {
+                    tileSize = 512;
+                }
+                return Math.pow(2, zoom) * tileSize;
             }
         }).addTo(map);
 
