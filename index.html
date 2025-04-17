@@ -49,16 +49,7 @@
     .btn.active {
       background-color: #0057b7;
       color: white;
-    }
-    .verstoesse {
-      margin-top: 2rem;
-      background-color: #f8f8f8;
-      padding: 1rem;
-      border-radius: 8px;
-      font-size: 1rem;
-      font-weight: bold;
-      color: #c70000;
-    }
+
     @media (max-width: 600px) {
       .btn {
         font-size: 1rem;
@@ -74,7 +65,7 @@
   <div class="navbar">POLIZEI <button onclick="locateUser()" style="margin-left: 1rem; background: white; color: #0057b7; border: none; padding: 0.5rem 1rem; border-radius: 5px; font-weight: bold; cursor: pointer;">Standort ermitteln</button></div>
   <div id="map"></div>
   
-  <ul id="verstoesse-list"></ul>
+  <ul id="verstoesse-list" style="color: #c70000;"></ul>
 </div>
 <div class="container">
     <div class="question" data-id="verbot">Befindet sich der Betroffene in einer Verbotszone?</div>
@@ -97,23 +88,23 @@
       <div class="btn" onclick="select('gram30', true)">Ja</div>
       <div class="btn" onclick="select('gram30', false)">Nein</div>
     </div>
-    <div id="verstoesse" class="verstoesse" style="display: none;">
-      <div>Verstöße:</div>
+    <div id="verstoesse" class="verstoesse">
+
       <ul id="verstoesse-list"></ul>
     </div>
   </div>
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
-    const map = L.map('map').setView([48.5492, 8.7291], 14);
+    const map = L.map('map').setView([48.5492, 8.7291], 15);
     L.tileLayer('https://tiles.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
       attribution: '&copy; <a href="https://carto.com/attributions">CARTO</a> | OpenStreetMap'
     }).addTo(map);
 
     const verstossListe = {
-      verbot: 'Ordnungswidrigkeit gemäß § 5(1) KcanG (Ordnungswidrigkeit)',
-      jugend: 'Ordnungswidrigkeit gemäß § 5(2) KcanG (Ordnungswidrigkeit)',
-      gram25: 'Ordnungswidrigkeit gemäß § 36(1) Nr. 1a KcanG (Ordnungswidrigkeit)',
-      gram30: 'Ordnungswidrigkeit gemäß § 34(1) Nr. 1a KcanG'
+      verbot: 'Verstoß gegen § 5(1) KcanG (Ordnungswidrigkeit)',
+      jugend: 'Verstoß gegen § 5(2) KcanG (Ordnungswidrigkeit)',
+      gram25: 'Verstoß gegen § 36(1) Nr. 1a KcanG (Ordnungswidrigkeit)',
+      gram30: 'Straftat nach § 34(1) Nr. 1a KcanG'
     };
 
     const state = {
