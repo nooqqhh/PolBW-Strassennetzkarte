@@ -73,7 +73,10 @@
 <body>
   <div class="navbar">POLIZEI <button onclick="locateUser()" style="margin-left: 1rem; background: white; color: #0057b7; border: none; padding: 0.5rem 1rem; border-radius: 5px; font-weight: bold; cursor: pointer;">Standort ermitteln</button></div>
   <div id="map"></div>
-  <div class="container">
+  
+  <ul id="verstoesse-list"></ul>
+</div>
+<div class="container">
     <div class="question" data-id="verbot">Befindet sich der Betroffene in einer Verbotszone?</div>
     <div class="btn-group">
       <div class="btn" onclick="select('verbot', true)">Ja</div>
@@ -107,10 +110,10 @@
     }).addTo(map);
 
     const verstossListe = {
-      verboten: 'Verstoß gegen § 5(1) KcanG (Ordnungswidrigkeit)',
-      jugend: 'Verstoß gegen § 5(2) KcanG (Ordnungswidrigkeit)',
-      gram25: 'Verstoß gegen § 36(1) Nr. 1a KcanG (Ordnungswidrigkeit)',
-      gram30: 'Straftat nach § 34(1) Nr. 1a KcanG'
+      verbot: 'Ordnungswidrigkeit gemäß § 5(1) KcanG (Ordnungswidrigkeit)',
+      jugend: 'Ordnungswidrigkeit gemäß § 5(2) KcanG (Ordnungswidrigkeit)',
+      gram25: 'Ordnungswidrigkeit gemäß § 36(1) Nr. 1a KcanG (Ordnungswidrigkeit)',
+      gram30: 'Ordnungswidrigkeit gemäß § 34(1) Nr. 1a KcanG'
     };
 
     const state = {
@@ -235,11 +238,11 @@
             drawnMarkers.add(el.id);
             L.circle([lat, lon], {
               radius: 100,
-              color: "#43b581",
               fillColor: "#43b581",
-              fillOpacity: 0.3,
-              weight: 2,
-              opacity: 1
+              fillOpacity: 0.2,
+              weight: 0,
+              opacity: 0,
+              renderer: L.canvas({ padding: 0.5 })
             }).addTo(map);
           }
         });
