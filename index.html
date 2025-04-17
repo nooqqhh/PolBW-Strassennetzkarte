@@ -1,182 +1,269 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Netzkarte BW</title>
-
-    <!-- Leaflet CSS einbinden -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-
-    <!-- Leaflet Geocoder CSS für das Suchfeld -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
-
-    <!-- Leaflet JS einbinden -->
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
-    <!-- Leaflet Geocoder JS einbinden -->
-    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
-
-    <style>
-        /* Die Karte nimmt die gesamte Bildschirmbreite und -höhe ein */
-        #map {
-            width: 100%;
-            height: 90vh; /* Vollbildhöhe */
-        }
-
-        /* Die Kopfzeile mit den Schaltflächen */
-        .header {
-            display: flex;
-            justify-content: center;
-            padding: 5px;
-            color: white;
-            background-color: #1985ff;
-            font-family: Arial, Helvetica, sans-serif;
-            text-transform: uppercase;
-        }
-
-        h1 {
-            margin: 0;
-            font-size: 20px;
-            flex-grow: 1; /* Macht den Titel flexibel */
-            text-align: center;
-        }
-
-        /* Styling der Schaltflächen */
-        #locateButton, #searchButton {
-            padding: 10px;
-            background-color: #1985ff;
-            color:white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        #locateButton:hover, #searchButton:hover {
-            background-color: #1985ff;
-        }
-
-        /* Styling für das Suchfeld */
-        .leaflet-control-geocoder {
-            flex-grow: 2;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>POLIZEI KcanG</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+    }
+    .navbar {
+      background-color: #0057b7;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    #map {
+      height: 300px;
+      width: 100%;
+    }
+    .container {
+      padding: 1rem;
+    }
+    .question {
+      margin-top: 1.5rem;
+      font-size: 1.1rem;
+      font-weight: bold;
+    }
+    .btn-group {
+      margin-top: 0.5rem;
+      display: flex;
+      gap: 1rem;
+    }
+    .btn {
+      flex: 1;
+      padding: 0.8rem;
+      border: 2px solid #0057b7;
+      background-color: white;
+      color: #0057b7;
+      font-weight: bold;
+      border-radius: 5px;
+      text-align: center;
+      cursor: pointer;
+    }
+    .btn.active {
+      background-color: #0057b7;
+      color: white;
+    }
+    .verstoesse {
+      margin-top: 2rem;
+      background-color: #f8f8f8;
+      padding: 1rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: bold;
+      color: #c70000;
+    }
+    @media (max-width: 600px) {
+      .btn {
+        font-size: 1rem;
+        padding: 0.6rem;
+      }
+      .navbar {
+        font-size: 1.2rem;
+      }
+    }
+  </style>
 </head>
 <body>
-    <!-- Kopfzeile mit der Karte und den Buttons -->
-    <div class="header">
-        <h1>PolBW - Straßennetzkarte 1:100.000</h1>
-
-        <!-- GPS Standort Button -->
-        <button id="locateButton">Mein Standort</button>
+  <div class="navbar">POLIZEI <button onclick="locateUser()" style="margin-left: 1rem; background: white; color: #0057b7; border: none; padding: 0.5rem 1rem; border-radius: 5px; font-weight: bold; cursor: pointer;">Standort ermitteln</button></div>
+  <div id="map"></div>
+  <div class="container">
+    <div class="question" data-id="verbot">Befindet sich der Betroffene in einer Verbotszone?</div>
+    <div class="btn-group">
+      <div class="btn" onclick="select('verbot', true)">Ja</div>
+      <div class="btn" onclick="select('verbot', false)">Nein</div>
     </div>
-    
-    <!-- Container für die Karte -->
-    <div id="map"></div>
+    <div class="question" data-id="jugend">Befinden sich in unmittelbarer Nähe Personen unter 18 Jahren?</div>
+    <div class="btn-group">
+      <div class="btn" onclick="select('jugend', true)">Ja</div>
+      <div class="btn" onclick="select('jugend', false)">Nein</div>
+    </div>
+    <div class="question" data-id="gram25">Führt der Betroffene mehr als 25 Gramm Cannabis bei sich?</div>
+    <div class="btn-group">
+      <div class="btn" onclick="select('gram25', true)">Ja</div>
+      <div class="btn" onclick="select('gram25', false)">Nein</div>
+    </div>
+    <div class="question" data-id="gram30">Führt der Betroffene mehr als 30 Gramm Cannabis bei sich?</div>
+    <div class="btn-group">
+      <div class="btn" onclick="select('gram30', true)">Ja</div>
+      <div class="btn" onclick="select('gram30', false)">Nein</div>
+    </div>
+    <div id="verstoesse" class="verstoesse" style="display: none;">
+      <div>Verstöße:</div>
+      <ul id="verstoesse-list"></ul>
+    </div>
+  </div>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    const map = L.map('map').setView([48.5492, 8.7291], 14);
+    L.tileLayer('https://tiles.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://carto.com/attributions">CARTO</a> | OpenStreetMap'
+    }).addTo(map);
 
-    <script>
-        // Die Geokoordinaten von Baden-Württemberg und ein geeigneter Zoom-Level
-        var map = L.map('map').setView([48.7, 9.2], 12);  // Baden-Württemberg zentrieren und ein Zoom-Level setzen
+    const verstossListe = {
+      verboten: 'Verstoß gegen § 5(1) KcanG (Ordnungswidrigkeit)',
+      jugend: 'Verstoß gegen § 5(2) KcanG (Ordnungswidrigkeit)',
+      gram25: 'Verstoß gegen § 36(1) Nr. 1a KcanG (Ordnungswidrigkeit)',
+      gram30: 'Straftat nach § 34(1) Nr. 1a KcanG'
+    };
 
+    const state = {
+      verboten: false,
+      jugend: false,
+      gram25: false,
+      gram30: false
+    };
 
+    function select(field, value) {
+      state[field] = value;
+      updateButtons(field, value);
+      updateVerstoesse();
+    }
 
-        function getTileSize() {
+    function updateButtons(field, value) {
+      const question = document.querySelector(`.question[data-id="${field}"]`);
+      if (!question) return;
+      const group = question.nextElementSibling;
+      if (!group) return;
+      group.children[0].classList.remove("active");
+      group.children[1].classList.remove("active");
+      group.children[value ? 0 : 1].classList.add("active");
+    }
 
-            if (window.innerWidth <= 600) {
-                return 100;
-            } else {
-                return 256;
-            }
+    function updateVerstoesse() {
+      const list = document.getElementById("verstoesse-list");
+      list.innerHTML = "";
+      let show = false;
+      for (const [key, val] of Object.entries(state)) {
+        if (val) {
+          show = true;
+          const li = document.createElement("li");
+          li.textContent = verstossListe[key];
+          list.appendChild(li);
         }
+      }
+      document.getElementById("verstoesse").style.display = show ? "block" : "none";
+    }
 
+    const drawnMarkers = new Set();
 
-        // WMS-Layer von LGL-BW hinzufügen
-        L.tileLayer.wms('https://owsproxy.lgl-bw.de/owsproxy/ows/WMS_LGL-BW_SNK_100_K?', {
-            layers: 'RDS.LY_SNK100K_col',  // Der Layername, den du verwenden möchtest
-            format: 'image/png',
-            transparent: true,
-            attribution: '&copy; Landesamt für Geoinformation und Landentwicklung Baden-Württemberg',
-            request: 'GetMap',  // GetMap-Anfrage
-            srs: 'EPSG:4326',  // WMS-Standard Koordinatenreferenzsystem (Lat/Lon)
-            tileSize: getTileSize(),
-            maxZoom: 19,
-            minZoom: 11
-        }).addTo(map);
+    function fetchVisibleMarkers() {
+      const bounds = map.getBounds();
+      const bbox = `${bounds.getSouth()},${bounds.getWest()},${bounds.getNorth()},${bounds.getEast()}`;
+      const query = `
+        [out:json][timeout:25];
+        (
+          node["leisure"="playground"](${bbox});
+          way["leisure"="playground"](${bbox});
+          relation["leisure"="playground"](${bbox});
 
-        // Begrenzung der Karte auf Baden-Württemberg
-        var bounds = [
-            [47.4, 7.2],   // Südwestliche Ecke (ungefähr)
-            [50.0, 10.7]   // Nordöstliche Ecke (ungefähr)
-        ];
-        
-        map.setMaxBounds(bounds); // Verhindert, dass man die Karte außerhalb von BW bewegen kann
-        map.on('drag', function() {
-            map.panInsideBounds(bounds);
+          node["amenity"="school"](${bbox});
+          way["amenity"="school"](${bbox});
+          relation["amenity"="school"](${bbox});
+
+          node["amenity"="kindergarten"](${bbox});
+          way["amenity"="kindergarten"](${bbox});
+          relation["amenity"="kindergarten"](${bbox});
+
+          node["building"="kindergarten"](${bbox});
+          way["building"="kindergarten"](${bbox});
+          relation["building"="kindergarten"](${bbox});
+
+          node["community_centre"="youth_centre"](${bbox});
+          way["community_centre"="youth_centre"](${bbox});
+          relation["community_centre"="youth_centre"](${bbox});
+
+          node["amenity"="childcare"](${bbox});
+          way["amenity"="childcare"](${bbox});
+          relation["amenity"="childcare"](${bbox});
+
+          node["name"~"Jugendherberge"](${bbox});
+          way["name"~"Jugendherberge"](${bbox});
+          relation["name"~"Jugendherberge"](${bbox});
+
+          node["social_facility:for"~"child|juvenile"](${bbox});
+          way["social_facility:for"~"child|juvenile"](${bbox});
+          relation["social_facility:for"~"child|juvenile"](${bbox});
+
+          node["healthcare:speciality"="child_psychiatry"](${bbox});
+          way["healthcare:speciality"="child_psychiatry"](${bbox});
+          relation["healthcare:speciality"="child_psychiatry"](${bbox});
+
+          node["community_centre:for"~"child|juvenile|girl|boy"](${bbox});
+          way["community_centre:for"~"child|juvenile|girl|boy"](${bbox});
+          relation["community_centre:for"~"child|juvenile|girl|boy"](${bbox});
+
+          node["club"="cannabis"](${bbox});
+          way["club"="cannabis"](${bbox});
+          relation["club"="cannabis"](${bbox});
+
+          node["leisure"~"pitch|sports_hall|sports_centre|horse_riding|stadium|indoor_play|golf_course|water_park"](${bbox});
+          way["leisure"~"pitch|sports_hall|sports_centre|horse_riding|stadium|indoor_play|golf_course|water_park"](${bbox});
+          relation["leisure"~"pitch|sports_hall|sports_centre|horse_riding|stadium|indoor_play|golf_course|water_park"](${bbox});
+
+          node["sport"="swimming"](${bbox});
+          way["sport"="swimming"](${bbox});
+          relation["sport"="swimming"](${bbox});
+
+          node["smoking:cannabis"="no"](${bbox});
+          way["smoking:cannabis"="no"](${bbox});
+          relation["smoking:cannabis"="no"](${bbox});
+
+          node["railway"="platform"]["operator"~"DB"](${bbox});
+          way["railway"="platform"]["operator"~"DB"](${bbox});
+          relation["railway"="platform"]["operator"~"DB"](${bbox});
+        );
+        out center;`;
+
+      fetch("https://overpass-api.de/api/interpreter", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: "data=" + encodeURIComponent(query)
+      })
+      .then(res => res.json())
+      .then(data => {
+        data.elements.forEach(el => {
+          const lat = el.lat || (el.center && el.center.lat);
+          const lon = el.lon || (el.center && el.center.lon);
+          if (lat && lon && !drawnMarkers.has(el.id)) {
+            drawnMarkers.add(el.id);
+            L.circle([lat, lon], {
+              radius: 100,
+              color: "#43b581",
+              fillColor: "#43b581",
+              fillOpacity: 0.3,
+              weight: 2,
+              opacity: 1
+            }).addTo(map);
+          }
         });
+      })
+      .catch(err => console.error("Overpass error", err));
+    }
 
-        // Adresssuche (Geocoding) mit Nominatim (OpenStreetMap)
-        var geocoder = L.Control.geocoder({
-            collapsed: true,  // Geocoder als zusammenklappbare Schaltfläche anzeigen
-            placeholder: 'Stadt oder Adresse suchen...',  // Text im Suchfeld
-            text: 'Suchen',  // Text für den Button
-            errorMessage: 'Stadt oder Adresse nicht gefunden'
-        }).addTo(map);
+    map.on("load moveend", fetchVisibleMarkers);
+    map.whenReady(fetchVisibleMarkers);
 
-        // GPS Standort ermitteln und Karte darauf zentrieren
-        document.getElementById('locateButton').onclick = function() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    var lat = position.coords.latitude;
-                    var lon = position.coords.longitude;
-
-                    // Den Standort auf der Karte zentrieren
-                    map.setView([lat, lon], 13);
-
-                    // Marker für den Standort hinzufügen
-                    L.marker([lat, lon]).addTo(map)
-                        .bindPopup("Ihr Standort")
-                        .openPopup();
-
-                    // Optional: Die Adresse des Standorts ermitteln
-                    var latlng = L.latLng(lat, lon);
-                    var reverseGeocodeUrl = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`;
-
-                    fetch(reverseGeocodeUrl)
-                        .then(response => response.json())
-                        .then(data => {
-                            var address = data.display_name;
-                            alert("Adresse: " + address);
-                        })
-                        .catch(error => {
-                            console.error("Fehler bei der Adressabfrage: ", error);
-                        });
-
-                }, function(error) {
-                    alert("Geolokalisierung fehlgeschlagen. Bitte überprüfen Sie die Berechtigungen.");
-                });
-            } else {
-                alert("Geolokalisierung wird von diesem Browser nicht unterstützt.");
-            }
-        };
-
-        // Funktion zur Suche von Adressen
-        document.getElementById('addressSearch').addEventListener('input', function(e) {
-            var searchText = e.target.value;
-            if (searchText.length > 3) {  // Ab 4 Zeichen wird die Suche ausgelöst
-                geocoder.geocode(searchText, function(results) {
-                    if (results.length > 0) {
-                        var lat = results[0].center.lat;
-                        var lon = results[0].center.lng;
-
-                        // Karte auf das Ergebnis zentrieren und Marker setzen
-                        map.setView([lat, lon], 13);
-                        L.marker([lat, lon]).addTo(map)
-                            .bindPopup(results[0].name)
-                            .openPopup();
-                    }
-                });
-            }
-        });
-    </script>
+    function locateUser() {
+      if (!navigator.geolocation) return alert("Geolocation wird nicht unterstützt.");
+      navigator.geolocation.getCurrentPosition(pos => {
+        const { latitude, longitude } = pos.coords;
+        L.marker([latitude, longitude], {
+          icon: L.icon({
+            iconUrl: 'https://cdn-icons-png.flaticon.com/512/64/64113.png',
+            iconSize: [25, 25],
+            iconAnchor: [12, 12]
+          })
+        }).addTo(map).bindPopup("Dein Standort").openPopup();
+        map.setView([latitude, longitude], 16);
+      }, () => alert("Standort konnte nicht ermittelt werden."));
+    }
+  </script>
 </body>
 </html>
